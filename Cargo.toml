@@ -1,7 +1,14 @@
 [package]
 name = "rustls-post-quantum-ffi"
 version = "0.1.0"
+authors = ["Daniel McCarney <daniel@binaryparadox.net>"]
+license = "Apache-2.0 OR ISC OR MIT"
+description = "rustls-ffi bindings for rustls-post-quantum"
+homepage = "https://github.com/cpu/rustls-post-quantum-ffi"
+repository = "https://github.com/cpu/rustls-post-quantum-ffi"
+categories = ["network-programming", "cryptography"]
 edition = "2021"
+rust-version = "1.64"
 
 [lib]
 crate-type = ["lib", "staticlib"]
