@@ -1,3 +1,5 @@
+[![rustls-post-quantum-ffi](https://github.com/cpu/rustls-post-quantum-ffi/actions/workflows/test.yaml/badge.svg)](https://github.com/cpu/rustls-post-quantum-ffi/actions/workflows/test.yaml)
+
 <p align="center">
   <img width="460" height="300" src="https://raw.githubusercontent.com/rustls/rustls/main/admin/rustls-logo-web.png">
 </p>
