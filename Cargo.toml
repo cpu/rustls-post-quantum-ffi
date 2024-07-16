@@ -3,4 +3,28 @@ name = "rustls-post-quantum-ffi"
 version = "0.1.0"
 edition = "2021"
 
+[lib]
+crate-type = ["lib", "staticlib"]
+
+[features]
+capi = []
+
 [dependencies]
+rustls-post-quantum = "0.1.0"
+
+[package.metadata.capi.header]
+name = "rustls-post-quantum-ffi"
+subdirectory = false
+generation = false # Prefer a vendored .h
+
+[package.metadata.capi.library]
+name = "rustls-post-quantum-ffi"
+version_suffix_components = 3
+rustflags = "-Cmetadata=rustls-post-quantum-ffi"
+
+[package.metadata.capi.pkg_config]
+name = "rustls-post-quantum-ffi"
+filename = "rustls-post-quantum-ffi"
+
+[package.metadata.capi.install.include]
+asset = [{ from = "src/rustls-post-quantum-ffi.h", to = "" }]
