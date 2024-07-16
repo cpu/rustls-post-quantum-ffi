@@ -1,0 +1,139 @@
+name: rustls-post-quantum-ffi
+
+permissions:
+  contents: read
+
+on:
+  push:
+  pull_request:
+  merge_group:
+  schedule:
+    - cron: '15 12 * * 3'
+
+jobs:
+  build:
+    name: Build+test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        cc: [ clang, gcc ]
+        rust:
+          - stable
+          - beta
+          - nightly
+          # MSRV - keep in sync with what rustls-ffi consider MSRV
+          - 1.64.0
+        os: [ ubuntu-latest ]
+        include:
+          - os: macos-latest
+            cc: clang
+            rust: stable
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install ${{ matrix.rust }} toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ matrix.rust }}
+      - name: Unit tests
+        run: cargo test --locked
+
+  ensure-header-updated:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install nightly rust toolchain
+        uses: dtolnay/rust-toolchain@nightly
+      - name: Install cbindgen
+        # Pin the installed version of cbindgen so that local usage can be
+        # reliably matched to CI. There can be non-semantic differences in
+        # output between point releases of cbindgen that will fail this check
+        # otherwise.
+        run: cargo install cbindgen --force --version 0.26.0
+      - run: touch src/lib.rs
+      - run: cbindgen --version
+      - run: cbindgen > src/rustls.h
+      - run: git diff --exit-code
+
+  docs:
+    name: Check for documentation errors
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install rust toolchain
+        uses: dtolnay/rust-toolchain@nightly
+
+      - name: cargo doc
+        run: cargo doc --all-features --no-deps --workspace
+        env:
+          RUSTDOCFLAGS: -Dwarnings
+
+  minver:
+    name: Check minimum versions
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install rust toolchain
+        uses: dtolnay/rust-toolchain@nightly
+
+      - name: cargo test (debug; all features; -Z minimal-versions)
+        run: cargo -Z minimal-versions test --all-features --locked
+
+  format:
+    name: Format
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install rust toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.67.1
+          components: rustfmt
+      - name: Check Rust formatting
+        run: cargo fmt --all -- --check
+
+  clippy:
+    name: Clippy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - name: Check clippy
+        run: cargo clippy --locked --workspace --all-targets -- -D warnings
+
+  clippy-nightly-optional:
+    name: Clippy nightly (optional)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install rust toolchain
+        uses: dtolnay/rust-toolchain@nightly
+        with:
+          components: clippy
+      - name: Check clippy
+        run: cargo clippy --locked --workspace --all-targets -- -D warnings
