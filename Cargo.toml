@@ -17,7 +17,7 @@ crate-type = ["lib", "staticlib"]
 capi = []
 
 [dependencies]
-rustls-post-quantum = "0.1.0"
+rustls-post-quantum = "0.2.2"
 
 [package.metadata.capi.header]
 name = "rustls-post-quantum-ffi"
